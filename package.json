@@ -7,6 +7,7 @@
     "test": "test"
   },
   "dependencies": {
+    "@openzeppelin/contracts": "^4.7.0",
     "abort-controller": "^3.0.0",
     "abstract-leveldown": "^6.3.0",
     "adm-zip": "^0.4.16",
@@ -291,6 +292,7 @@
     "side-channel": "^1.0.4",
     "slash": "^3.0.0",
     "solc": "^0.6.12",
+    "solidity-coverage": "^0.7.21",
     "source-map": "^0.6.1",
     "source-map-support": "^0.5.21",
     "spdx-correct": "^3.1.1",
