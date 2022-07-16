@@ -4,6 +4,8 @@ const utils = require("../scripts/lib/utils");
 const constants = require("./util/constants");
 const deploy = require("./util/deploy");
 
+//TODO: more coverage here
+
 describe("TheDumplesNFT: Store", function () {		  
 	let nft, store;		    //contracts
 	let owner, addr1; 		//accounts
@@ -41,7 +43,7 @@ describe("TheDumplesNFT: Store", function () {
         });
         
 		it("store can mint", async function () {
-            await store.connect(addr1).purchaseMint(addr1.address, {value:constants.MINT_PRICE}); 
+            await store.connect(addr1).mintNext(addr1.address, {value:constants.MINT_PRICE}); 
             expect(await(nft.balanceOf(addr1.address))).to.equal(1); 
 		});
     });  

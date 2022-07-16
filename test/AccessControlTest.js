@@ -98,17 +98,17 @@ describe("TheDumplesNFT: Access Control", function () {
     
 	describe("Minter Role", function () {
 		it("initial owner/admin can mint", async function () {
-			await nft.safeMint(owner.address); 
+			await nft.mintNext(owner.address); 
             expect(await nft.balanceOf(owner.address)).to.equal(1); 
 		});
         
 		it("non-minter cannot mint", async function () {
-			await expect(nft.connect(addr1).safeMint(addr1.address)).to.be.reverted;
+			await expect(nft.connect(addr1).mintNext(addr1.address)).to.be.reverted;
 		});
         
 		it("minter role can mint", async function () {
 			await(nft.grantRole(constants.roles.MINTER, addr1.address)); 
-			await nft.connect(addr1).safeMint(addr1.address); 
+			await nft.connect(addr1).mintNext(addr1.address); 
             expect(await nft.balanceOf(addr1.address)).to.equal(1); 
 		});
     }); 

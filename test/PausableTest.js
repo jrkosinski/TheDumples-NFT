@@ -54,11 +54,11 @@ describe("TheDumplesNFT: Pausable", function () {
 		it("cannot mint when paused", async function () {
             await nft.pause();
             expect(await nft.paused()).to.equal(true);
-            await expect(nft.safeMint(addr1.address)).to.be.revertedWith("Pausable: paused"); 
+            await expect(nft.mintNext(addr1.address)).to.be.revertedWith("Pausable: paused"); 
 		});
         
 		it("cannot transfer when paused", async function () {
-            await nft.safeMint(owner.address); 
+            await nft.mintNext(owner.address); 
             await nft.pause();
             expect(await nft.paused()).to.equal(true);
             await expect(nft.transferFrom(owner.address, addr1.address, 1)).to.be.revertedWith("Pausable: paused"); 

@@ -28,8 +28,9 @@ contract TheDumplesNFT is
     using Strings for uint256; 
     
     uint256 public maxSupply = 1; 
+    uint256 public collectionSize = 1; 
     string public baseUri = "ipfs://{hash}/";
-    uint256 private _tokenIdCounter = 1;
+    uint256 private _tokenIdCounter = 0;
     
     bytes32 public constant MINTER_ROLE = "MINTER";
 
@@ -46,8 +47,10 @@ contract TheDumplesNFT is
         string memory tokenName, 
         string memory tokenSymbol, 
         uint256 _maxSupply, 
+        uint256 _collectionSize, 
         string memory _baseUri
         ) ERC721(tokenName, tokenSymbol) {
+        require(collectionSize <= maxSupply, "TDN: collectionSize may not exceed maxSupply"); 
             
         //if an address is passed, it is the owner 
         if (initialOwner == address(0)) {
@@ -60,6 +63,7 @@ contract TheDumplesNFT is
         
         //set state 
         maxSupply = _maxSupply; 
+        collectionSize = _collectionSize;
         baseUri = _baseUri; 
     }
 
@@ -80,11 +84,19 @@ contract TheDumplesNFT is
     }
     
     /**
-     * @dev Owner can change the maxSupply - the number of items in the collection. 
+     * @dev Owner can change the maxSupply - the max number of items that can be minted. 
      * @param _maxSupply The new value to set for maxSupply. 
      */
     function setMaxSupply(uint256 _maxSupply) external onlyRole(DEFAULT_ADMIN_ROLE) {
         maxSupply = _maxSupply;
+    }
+    
+    /**
+     * @dev Owner can change the collectionSize - the number of items in the collection. 
+     * @param _collectionSize The new value to set for maxSupply. 
+     */
+    function setCollectionSize(uint256 _collectionSize) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        collectionSize = _collectionSize;
     }
     
     /**
@@ -98,27 +110,44 @@ contract TheDumplesNFT is
     /**
      * @dev Allows authorized caller (minter role only) to mint one. 
      * @param to The address of the token recipient once minted. 
+     * @return The token ID of the minted token. 
      */
-    function safeMint(address to) external override onlyRole(MINTER_ROLE) {
-        require(this.totalSupply() < maxSupply, "TDN: Max supply exceeded"); 
-            
-        uint256 tokenId = _tokenIdCounter;
-        _tokenIdCounter+=1; 
-        _safeMint(to, tokenId);
-        _setTokenURI(tokenId, _concatUri(tokenId));
+    function mintNext(address to) external override onlyRole(MINTER_ROLE) returns (uint256) {
+        return _mintNext(to);
     }
-
+    
     /**
-     * @dev Allows the owner to mint ALL tokens in the collection at once. 
-     * @param _to The address of the token recipient once minted. 
+     * @dev Mints the entire collection to the admin or owner (caller). 
      */
-    function safeMintAll(address _to) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        for(uint n=0; n<maxSupply; n++) {
-            uint256 tokenId = _tokenIdCounter;
-            _tokenIdCounter+=1; 
-            _safeMint(_to, tokenId);
-            _setTokenURI(tokenId, _concatUri(tokenId));
+    function initialMint() external onlyRole(DEFAULT_ADMIN_ROLE) {
+        for(uint n=0; n<collectionSize; n++) {
+            _mintNext(msg.sender);
         }
+    }
+    
+    /**
+     * @dev Mints the specified number of items in the collection to the given address. 
+     * If the address contains part of the collection already, starts from the last one 
+     * minted to that address. 
+     * The last index of the collection won't be exceeded. 
+     * @return The number of tokens minted. 
+     */
+    function multiMint(address to, uint256 count) external override onlyRole(MINTER_ROLE) returns (uint256) {
+        require(count <= collectionSize, "TDN: Count cannot exceed collection size"); 
+        
+        uint256 startIndex = this.balanceOf(to); 
+        uint256 limit = startIndex + count; 
+        if (limit > collectionSize) {
+            limit = collectionSize;
+        }
+        
+        uint256 numberMinted = 0;
+        for(uint n=startIndex; n<limit; n++) {
+            _mintNext(to);
+            numberMinted++;
+        }
+        
+        return numberMinted;
     }
 
     /**
@@ -178,5 +207,15 @@ contract TheDumplesNFT is
     
     function _concatUri(uint256 _tokenId) private view returns (string memory) {
         return string(abi.encodePacked(baseUri, _tokenId.toString(), ".json"));
+    }
+    
+    function _mintNext(address to) private returns (uint256) {
+        require(this.totalSupply() < maxSupply, "TDN: Max supply exceeded"); 
+        require(this.balanceOf(to) < collectionSize, "TDN: Max allowed per user exceeded"); 
+            
+        uint256 tokenId = ++_tokenIdCounter;
+        _safeMint(to, tokenId);
+        _setTokenURI(tokenId, _concatUri(this.balanceOf(to)));
+        return tokenId;
     }
 }

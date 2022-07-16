@@ -4,6 +4,8 @@ const utils = require("../scripts/lib/utils");
 const constants = require("./util/constants");
 const deploy = require("./util/deploy");
 
+//TODO: test with receiver hook 
+
 describe("TheDumplesNFT: Transferring", function () {		  
 	let nft;					//contracts
 	let owner, addr1, addr2;	//accounts
@@ -14,9 +16,9 @@ describe("TheDumplesNFT: Transferring", function () {
         //contract
 		nft = await deploy.deployNFT();
         
-        nft.safeMint(owner.address); 
-        nft.safeMint(owner.address); 
-        nft.safeMint(owner.address); 
+        nft.mintNext(owner.address); 
+        nft.mintNext(owner.address); 
+        nft.mintNext(owner.address); 
 	});
 	
 	describe("Initial State", function() { 

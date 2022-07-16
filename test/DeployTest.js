@@ -29,6 +29,7 @@ describe("TheDumplesNFT: Deployment", function () {
                 constants.NAME, 
                 constants.SYMBOL, 
                 constants.MAX_SUPPLY, 
+                constants.COLLECTION_SIZE,
                 constants.BASE_URI
             ]);
             

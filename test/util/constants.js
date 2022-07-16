@@ -1,6 +1,7 @@
 module.exports = {
-    BASE_URI : "ipfs://uri",
+    BASE_URI : "ipfs://ipfs_file_hash/",
     MAX_SUPPLY : 5, 
+    COLLECTION_SIZE : 5, 
     NAME : "TheDumplesTest", 
     SYMBOL : "TDT", 
     MINT_PRICE: 10000000000,

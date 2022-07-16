@@ -21,6 +21,8 @@ contract NFTStore is Pausable, Ownable {
     
     /**
      * @dev Constructor. 
+     * @param _nftContract The address of the NFT contract whose items are being sold. 
+     * @param _mintPrice The price charged per unit to mint. 
      */
     constructor(IMintable _nftContract, uint256 _mintPrice) {
         nftContract = _nftContract;
@@ -54,16 +56,30 @@ contract NFTStore is Pausable, Ownable {
      * @param to The NFT token recipient. 
      * @return tokenId The ID of the minted token. 
      */
-    function purchaseMint(address to) external payable returns(uint256 tokenId) {
+    function mintNext(address to) external payable returns(uint256) {
+        require(address(nftContract) != address(0), "NFTStore: NFT address not set");
         require(msg.value >= mintPrice, "NFTStore: transferred value less than price");
+        
+        return nftContract.mintNext(to); 
+    }
+    
+    /**
+     * @dev Sell multiple mints in the collection to a single user. Will be reverted if the 
+     * number to be minted exceeds the number allowed.
+     * @param to The NFT token recipient. 
+     * @return The number minted and sold. 
+     */
+    function multiMint(address to, uint256 count) external payable returns (uint256) {
         require(address(nftContract) != address(0), "NFTStore: NFT address not set");
         
-        nftContract.safeMint(to); 
-        return 1;
+        uint256 numberMinted = nftContract.multiMint(to, count); 
+        require(msg.value >= (numberMinted * mintPrice), "NFTStore: transferred value less than price");
+        return numberMinted;
     }
     
     /**
      * @dev Contract owner can withdraw all collected funds from contract. 
+     * @return True if successful. 
      */
     function withdrawAll() external onlyOwner returns (bool) {
         (bool success,) = msg.sender.call{value:address(this).balance}(""); 

@@ -18,6 +18,7 @@ describe("TheDumplesNFT: Basic", function () {
 	describe("Initial State", function () {
 		it("property values", async function () {
 			expect(await nft.maxSupply()).to.equal(constants.MAX_SUPPLY); 
+			expect(await nft.collectionSize()).to.equal(constants.COLLECTION_SIZE); 
 			expect(await nft.baseUri()).to.equal(constants.BASE_URI); 
 			expect(await nft.name()).to.equal(constants.NAME); 
 			expect(await nft.symbol()).to.equal(constants.SYMBOL); 
@@ -37,9 +38,15 @@ describe("TheDumplesNFT: Basic", function () {
 	
 	describe("Set/Read Properties", function () {
 		it("max supply", async function () {
-            const newSupply = 1111;
+            const newSupply = constants.MAX_SUPPLY + 1;
             await nft.setMaxSupply(newSupply);
 			expect(await nft.maxSupply()).to.equal(newSupply); 
+		});
+		
+		it("collection size", async function () {
+            const newSize = constants.COLLECTION_SIZE + 1;
+            await nft.setCollectionSize(newSize);
+			expect(await nft.collectionSize()).to.equal(newSize); 
 		});
         
 		it("base URI", async function () {

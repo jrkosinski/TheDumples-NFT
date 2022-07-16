@@ -17,7 +17,7 @@ describe("TheDumplesNFT: Burning", function () {
 	
 	describe("Burning Tokens", function() {        
 		it("owner can burn a token", async function () {
-            await nft.safeMint(addr1.address); 
+            await nft.mintNext(addr1.address); 
             
             expect(await nft.ownerOf(1)).to.equal(addr1.address); 
 			await nft.connect(addr1).burn(1); 
@@ -27,7 +27,7 @@ describe("TheDumplesNFT: Burning", function () {
 		});
 		
 		it("non-owner can burn another's token without approval", async function () {
-            await nft.safeMint(addr1.address); 
+            await nft.mintNext(addr1.address); 
 			
             expect(await nft.ownerOf(1)).to.equal(addr1.address); 
 			await expect(
@@ -36,7 +36,7 @@ describe("TheDumplesNFT: Burning", function () {
 		});
 		
 		it("approved non-owner can burn another's token", async function () {
-            await nft.safeMint(addr1.address); 
+            await nft.mintNext(addr1.address); 
 			
             expect(await nft.ownerOf(1)).to.equal(addr1.address); 
 			

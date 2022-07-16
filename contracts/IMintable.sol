@@ -22,6 +22,15 @@ interface IMintable  {
     /**
      * @dev Allows someone to mint. 
      * @param to The address of the token recipient once minted. 
+     * @return The tokenId of the newly minted token.
      */
-    function safeMint(address to) external;
+    function mintNext(address to) external returns (uint256);
+    
+    /**
+     * @dev Allows someone to mint more than one item from the collection at once. 
+     * @param to The address of the token recipient once minted. 
+     * @param count The max number of tokens to be minted. 
+     * @return The number of tokens minted to the recipient. 
+     */
+    function multiMint(address to, uint256 count) external returns (uint256);
 }
