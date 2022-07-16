@@ -56,7 +56,7 @@ contract NFTStore is Pausable, Ownable {
      */
     function purchaseMint(address to) external payable returns(uint256 tokenId) {
         require(msg.value >= mintPrice, "NFTStore: transferred value less than price");
-        require(address(nftContract) != 0x0000000000000000000000000000000000000000, "NFTStore: NFT address not set");
+        require(address(nftContract) != address(0), "NFTStore: NFT address not set");
         
         nftContract.safeMint(to); 
         return 1;

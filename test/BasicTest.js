@@ -2,6 +2,7 @@ const { expect } = require("chai");
 const { ethers } = require("hardhat");
 const utils = require("../scripts/lib/utils");
 const constants = require("./util/constants");
+const deploy = require("./util/deploy");
 
 describe("TheDumplesNFT: Basic", function () {		  
 	let nft;				//contracts
@@ -11,12 +12,7 @@ describe("TheDumplesNFT: Basic", function () {
 		[owner, addr1,...addrs] = await ethers.getSigners();
         
         //contract
-		nft = await utils.deployContractSilent("TheDumplesNFT", [
-            constants.NAME, 
-            constants.SYMBOL, 
-            constants.MAX_SUPPLY, 
-            constants.BASE_URI
-        ]); 
+		nft = await deploy.deployNFT();
 	});
 	
 	describe("Initial State", function () {
@@ -31,6 +27,11 @@ describe("TheDumplesNFT: Basic", function () {
 			expect(await nft.totalSupply()).to.equal(0); 
 			expect(await nft.balanceOf(owner.address)).to.equal(0); 
 			expect(await nft.balanceOf(addr1.address)).to.equal(0); 
+		});
+        
+		it("access", async function () {
+			expect(await nft.hasRole(constants.roles.ADMIN, owner.address)).to.equal(true);
+			expect(await nft.hasRole(constants.roles.MINTER, owner.address)).to.equal(true);
 		});
     });  
 	

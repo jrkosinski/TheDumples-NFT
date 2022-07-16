@@ -2,7 +2,7 @@ const { expect } = require("chai");
 const { ethers } = require("hardhat");
 const utils = require("../scripts/lib/utils");
 const constants = require("./util/constants");
-
+const deploy = require("./util/deploy");
 
 describe("TheDumplesNFT: Access Control", function () {		  
 	let nft;				    //contracts
@@ -12,12 +12,7 @@ describe("TheDumplesNFT: Access Control", function () {
 		[owner, addr1, addr2,...addrs] = await ethers.getSigners();
         
         //contract
-		nft = await utils.deployContractSilent("TheDumplesNFT", [
-            constants.NAME, 
-            constants.SYMBOL, 
-            constants.MAX_SUPPLY, 
-            constants.BASE_URI
-        ]); 
+		nft = await deploy.deployNFT();
 	});
 	
 	describe("Initial State", function () {

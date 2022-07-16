@@ -5,7 +5,6 @@ import "./openzeppelin/token/ERC721/ERC721.sol";
 import "./openzeppelin/token/ERC721/extensions/ERC721Enumerable.sol";
 import "./openzeppelin/token/ERC721/extensions/ERC721URIStorage.sol";
 import "./openzeppelin/security/Pausable.sol";
-import "./openzeppelin/access/Ownable.sol";
 import "./openzeppelin/utils/Counters.sol";
 import "./openzeppelin/utils/Strings.sol";
 import "./openzeppelin/access/AccessControl.sol";
@@ -25,7 +24,6 @@ contract TheDumplesNFT is
         ERC721Enumerable, 
         ERC721URIStorage, 
         Pausable, 
-        Ownable, 
         AccessControl {
     using Strings for uint256; 
     
@@ -37,21 +35,28 @@ contract TheDumplesNFT is
 
     /**
      * @dev Constructor. 
+     * @param initialOwner Initial owner address (if 0x0, owner becomes msg.sender)
      * @param tokenName NFT token name 
      * @param tokenSymbol NFT token symbol 
      * @param _maxSupply Number of items in the collection 
      * @param _baseUri Base URI used in token URI generation (incremented)
      */
     constructor(
+        address initialOwner,
         string memory tokenName, 
         string memory tokenSymbol, 
         uint256 _maxSupply, 
         string memory _baseUri
         ) ERC721(tokenName, tokenSymbol) {
+            
+        //if an address is passed, it is the owner 
+        if (initialOwner == address(0)) {
+            initialOwner = msg.sender;
+        }
         
         //creator is admin and minter 
-        _grantRole(MINTER_ROLE, msg.sender);
-        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        _grantRole(MINTER_ROLE, initialOwner);
+        _grantRole(DEFAULT_ADMIN_ROLE, initialOwner);
         
         //set state 
         maxSupply = _maxSupply; 
@@ -91,7 +96,7 @@ contract TheDumplesNFT is
     }
 
     /**
-     * @dev Allows authorized caller to mint one.
+     * @dev Allows authorized caller (minter role only) to mint one. 
      * @param to The address of the token recipient once minted. 
      */
     function safeMint(address to) external override onlyRole(MINTER_ROLE) {

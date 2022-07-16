@@ -2,6 +2,7 @@ const { expect } = require("chai");
 const { ethers } = require("hardhat");
 const utils = require("../scripts/lib/utils");
 const constants = require("./util/constants");
+const deploy = require("./util/deploy");
 
 describe("TheDumplesNFT: Store", function () {		  
 	let nft, store;		    //contracts
@@ -11,12 +12,7 @@ describe("TheDumplesNFT: Store", function () {
 		[owner, addr1,...addrs] = await ethers.getSigners();
         
         //contract
-		nft = await utils.deployContractSilent("TheDumplesNFT", [
-            constants.NAME, 
-            constants.SYMBOL, 
-            constants.MAX_SUPPLY, 
-            constants.BASE_URI
-        ]); 
+		nft = await deploy.deployNFT();
         
         store = await utils.deployContractSilent("NFTStore", [nft.address, constants.MINT_PRICE]); 
 	});
