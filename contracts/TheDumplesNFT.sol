@@ -135,12 +135,14 @@ contract TheDumplesNFT is
     function multiMint(address to, uint256 count) external override onlyRole(MINTER_ROLE) returns (uint256) {
         require(count <= collectionSize, "TDN: Count cannot exceed collection size"); 
         
+        //get the start index & limit
         uint256 startIndex = this.balanceOf(to); 
         uint256 limit = startIndex + count; 
         if (limit > collectionSize) {
             limit = collectionSize;
         }
         
+        //mint tokens and count number minted
         uint256 numberMinted = 0;
         for(uint n=startIndex; n<limit; n++) {
             _mintNext(to);
@@ -196,8 +198,7 @@ contract TheDumplesNFT is
     function _beforeTokenTransfer(address _from, address _to, uint256 _tokenId)
         internal
         whenNotPaused
-        override(ERC721, ERC721Enumerable)
-    {
+        override(ERC721, ERC721Enumerable)  {
         super._beforeTokenTransfer(_from, _to, _tokenId);
     }
     
