@@ -4,7 +4,7 @@ const utils = require("../scripts/lib/utils");
 const constants = require("./util/constants");
 const deploy = require("./util/deploy");
 
-//TODO: more coverage here
+//TODO: add more coverage here
 
 describe("TheDumplesNFT: Store", function () {		  
 	let nft, store;		    //contracts

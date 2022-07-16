@@ -8,9 +8,6 @@ describe("TheDumplesNFT: Minting", function () {
     let nft;                    //contracts
     let owner, addr1, addr2;    //addresses
     
-    //TODO: test that max supply can't be exceeded 
-    //TODO: test that max per user can't be exceeded 
-    
 	beforeEach(async function () {
 		[owner, addr1, addr2,...addrs] = await ethers.getSigners();
         

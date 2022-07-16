@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import "./IMintable.sol";
 import "./openzeppelin/security/Pausable.sol";
 import "./openzeppelin/access/Ownable.sol";
+import "./IMintable.sol";
 
 /**
  * @title The Dumples NFT Collection Factory
@@ -17,7 +17,8 @@ import "./openzeppelin/access/Ownable.sol";
  */
 contract NFTStore is Pausable, Ownable {
     IMintable public nftContract; 
-    uint256 public mintPrice = 0;
+    uint256 public mintPrice = 0; 
+    mapping(address => uint256) private specialPrices;
     
     /**
      * @dev Constructor. 
@@ -52,13 +53,30 @@ contract NFTStore is Pausable, Ownable {
     }
     
     /**
+     * Owner can set custom prices for specific address recipients. 
+     * @param to The recipient for whom to set a custom price. 
+     * @param price The price to set for the given recipient. 
+     */
+    function setSpecialPrice(address to, uint256 price) external onlyOwner {
+        specialPrices[to] = price;
+    }
+    
+    /**
+     * Owner can set clear a custom price set previously for a recipient. 
+     * @param to The recipient for whom to clear a custom price. 
+     */
+    function clearSpecialPrice(address to) external onlyOwner {
+        specialPrices[to] = 0;
+    }
+    
+    /**
      * @dev Anyone can purchase the right to mint, and mint an NFT from contract. 
      * @param to The NFT token recipient. 
      * @return tokenId The ID of the minted token. 
      */
     function mintNext(address to) external payable returns(uint256) {
         require(address(nftContract) != address(0), "NFTStore: NFT address not set");
-        require(msg.value >= mintPrice, "NFTStore: transferred value less than price");
+        require(msg.value >= getMintPrice(to), "NFTStore: transferred value less than price");
         
         return nftContract.mintNext(to); 
     }
@@ -73,7 +91,7 @@ contract NFTStore is Pausable, Ownable {
         require(address(nftContract) != address(0), "NFTStore: NFT address not set");
         
         uint256 numberMinted = nftContract.multiMint(to, count); 
-        require(msg.value >= (numberMinted * mintPrice), "NFTStore: transferred value less than price");
+        require(msg.value >= (numberMinted * getMintPrice(to)), "NFTStore: transferred value less than price");
         return numberMinted;
     }
     
@@ -84,5 +102,19 @@ contract NFTStore is Pausable, Ownable {
     function withdrawAll() external onlyOwner returns (bool) {
         (bool success,) = msg.sender.call{value:address(this).balance}(""); 
         return success;
+    }
+    
+    /**
+     * @dev Returns either a custom or standard price as appropriate for the given 
+     * recipient. 
+     * @param to The recipient for whom to get mint price. 
+     * @return price The appropriate price for the recipient. 
+     */
+    function getMintPrice(address to) internal view returns (uint256 price) {
+        price = specialPrices[to]; 
+        if (price == 0) 
+            price = mintPrice;
+        else if (price > mintPrice) 
+            price = mintPrice;
     }
 }
