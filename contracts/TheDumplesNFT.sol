@@ -8,6 +8,8 @@ import "./openzeppelin/security/Pausable.sol";
 import "./openzeppelin/access/Ownable.sol";
 import "./openzeppelin/utils/Counters.sol";
 import "./openzeppelin/utils/Strings.sol";
+import "./openzeppelin/access/AccessControl.sol";
+import "./IMintable.sol";
 
 /**
  * @title The Dumples NFT Collection 
@@ -17,80 +19,95 @@ import "./openzeppelin/utils/Strings.sol";
  * or individually, with the option to (a) add more tokens in the future, and mint them, and 
  * (b) to create a new version of the contract if desired. 
  */
-contract TheDumplesNFT is ERC721, ERC721Enumerable, ERC721URIStorage, Pausable, Ownable {
+contract TheDumplesNFT is 
+        IMintable, 
+        ERC721, 
+        ERC721Enumerable, 
+        ERC721URIStorage, 
+        Pausable, 
+        Ownable, 
+        AccessControl {
     using Strings for uint256; 
     
     uint256 public maxSupply = 1; 
     string public baseUri = "ipfs://{hash}/";
     uint256 private _tokenIdCounter = 1;
+    
+    bytes32 public constant MINTER_ROLE = "MINTER";
 
     /**
-     * Constructor. 
-     * @param _tokenName NFT token name 
-     * @param _tokenSymbol NFT token symbol 
+     * @dev Constructor. 
+     * @param tokenName NFT token name 
+     * @param tokenSymbol NFT token symbol 
      * @param _maxSupply Number of items in the collection 
      * @param _baseUri Base URI used in token URI generation (incremented)
      */
     constructor(
-        string memory _tokenName, 
-        string memory _tokenSymbol, 
+        string memory tokenName, 
+        string memory tokenSymbol, 
         uint256 _maxSupply, 
         string memory _baseUri
-        ) ERC721(_tokenName, _tokenSymbol) {
-            
+        ) ERC721(tokenName, tokenSymbol) {
+        
+        //creator is admin and minter 
+        _grantRole(MINTER_ROLE, msg.sender);
+        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        
+        //set state 
         maxSupply = _maxSupply; 
         baseUri = _baseUri; 
     }
 
     /**
-     * Pauses the contract execution. 
-     * @dev Functions like transfer and mint will revert when contract is paused. 
+     * @dev Pauses the contract execution. Functions like transfer and mint will 
+     * revert when contract is paused. 
      */
-    function pause() external onlyOwner {
+    function pause() external onlyRole(DEFAULT_ADMIN_ROLE) {
         _pause();
     }
 
     /**
-     * Unpauses the contract execution. 
-     * @dev Will revert if contract is not paused. 
+     * @dev Unpauses the contract execution. 
+     * Will revert if contract is not paused. 
      */
-    function unpause() external onlyOwner {
+    function unpause() external onlyRole(DEFAULT_ADMIN_ROLE) {
         _unpause();
     }
     
     /**
-     * Owner can change the maxSupply - the number of items in the collection. 
+     * @dev Owner can change the maxSupply - the number of items in the collection. 
      * @param _maxSupply The new value to set for maxSupply. 
      */
-    function setMaxSupply(uint256 _maxSupply) external onlyOwner {
+    function setMaxSupply(uint256 _maxSupply) external onlyRole(DEFAULT_ADMIN_ROLE) {
         maxSupply = _maxSupply;
     }
     
     /**
-     * Allows the owner to change the base token URI used to generate new token URIs. 
+     * @dev Allows the owner to change the base token URI used to generate new token URIs. 
      * @param _baseUri The new value of baseUri. 
      */
-    function setBaseUri(string memory _baseUri) external onlyOwner {
+    function setBaseUri(string memory _baseUri) external onlyRole(DEFAULT_ADMIN_ROLE) {
         baseUri = _baseUri; 
     }
 
     /**
-     * Allows the owner to mint. 
-     * @param _to The address of the token recipient once minted. 
+     * @dev Allows authorized caller to mint one.
+     * @param to The address of the token recipient once minted. 
      */
-    function safeMint(address _to) external onlyOwner {
+    function safeMint(address to) external override onlyRole(MINTER_ROLE) {
         require(this.totalSupply() < maxSupply, "TDN: Max supply exceeded"); 
+            
         uint256 tokenId = _tokenIdCounter;
         _tokenIdCounter+=1; 
-        _safeMint(_to, tokenId);
+        _safeMint(to, tokenId);
         _setTokenURI(tokenId, _concatUri(tokenId));
     }
 
     /**
-     * Allows the owner to mint ALL tokens in the collection at once. 
+     * @dev Allows the owner to mint ALL tokens in the collection at once. 
      * @param _to The address of the token recipient once minted. 
      */
-    function safeMintAll(address _to) external onlyOwner {
+    function safeMintAll(address _to) external onlyRole(DEFAULT_ADMIN_ROLE) {
         for(uint n=0; n<maxSupply; n++) {
             uint256 tokenId = _tokenIdCounter;
             _tokenIdCounter+=1; 
@@ -100,7 +117,7 @@ contract TheDumplesNFT is ERC721, ERC721Enumerable, ERC721URIStorage, Pausable, 
     }
 
     /**
-     * Owner of a token may burn or destroy it. 
+     * @dev Owner of a token may burn or destroy it. 
      * @param _tokenId The id of the token to burn. 
      */
     function burn(uint256 _tokenId) external virtual {
@@ -112,7 +129,7 @@ contract TheDumplesNFT is ERC721, ERC721Enumerable, ERC721URIStorage, Pausable, 
     }
 
     /**
-     * Returns the URI of the specified token. 
+     * @dev Returns the URI of the specified token. 
      * @param _tokenId The id of a token whose URI to return.
      * @return string Token URI. 
      */
@@ -126,14 +143,14 @@ contract TheDumplesNFT is ERC721, ERC721Enumerable, ERC721URIStorage, Pausable, 
     }
 
     /**
-     * ERC-165 implementation. 
+     * @dev ERC-165 implementation. 
      * @param _interfaceId An ERC-165 interface id to query. 
      * @return bool Whether or not the interface is supported by this contract. 
      */
     function supportsInterface(bytes4 _interfaceId)
         public
         view
-        override(ERC721, ERC721Enumerable)
+        override(ERC721, ERC721Enumerable, AccessControl)
         returns (bool)
     {
         return super.supportsInterface(_interfaceId);

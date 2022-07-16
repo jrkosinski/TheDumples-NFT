@@ -41,7 +41,7 @@ describe("TheDumplesNFT: Minting", function () {
         it("non-owner cannot mint token", async function () {
             await expect(nft.connect(addr1).safeMint(
                 addr1.address)
-            ).to.be.revertedWith("Ownable: caller is not the owner"); 
+            ).to.be.reverted; 
         }); 
         
         it("cannot get balance of nonexistent token", async function () {

@@ -44,7 +44,7 @@ describe("TheDumplesNFT: Pausable", function () {
 		});
         
 		it("non-owner cannot pause", async function () {
-            await expect(nft.connect(addr1).pause()).to.be.revertedWith("Ownable: caller is not the owner"); 
+            await expect(nft.connect(addr1).pause()).to.be.reverted; 
 		});
 	});
 	
