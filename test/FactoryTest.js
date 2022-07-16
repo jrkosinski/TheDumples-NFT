@@ -38,6 +38,25 @@ describe("TheDumplesNFT: Factory", function () {
                 constants.BASE_URI
             )).to.be.revertedWith("Ownable: caller is not the owner"); 
 		});
+    });  
+	
+	describe("Factory Pausable", function () {
+		it("non-owner cannot pause", async function () {
+            await expect(factory.connect(addr1).pause()
+            ).to.be.revertedWith("Ownable: caller is not the owner"); 
+		});
+        
+		it("owner can pause", async function () {
+            await factory.pause(); 
+            expect(await factory.paused()).to.equal(true); 
+        }); 
+        
+		it("owner can pause and unpause", async function () {
+            await factory.pause(); 
+            expect(await factory.paused()).to.equal(true); 
+            await factory.unpause(); 
+            expect(await factory.paused()).to.equal(false); 
+        }); 
         
 		it("cannot spawn when paused", async function () {
             await factory.pause(); 

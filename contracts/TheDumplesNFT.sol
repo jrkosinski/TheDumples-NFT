@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.7.0
+pragma solidity ^0.8.4;
 
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
-import "@openzeppelin/contracts/security/Pausable.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/utils/Counters.sol";
-import "@openzeppelin/contracts/utils/Strings.sol";
+import "./openzeppelin/token/ERC721/ERC721.sol";
+import "./openzeppelin/token/ERC721/extensions/ERC721Enumerable.sol";
+import "./openzeppelin/token/ERC721/extensions/ERC721URIStorage.sol";
+import "./openzeppelin/security/Pausable.sol";
+import "./openzeppelin/access/Ownable.sol";
+import "./openzeppelin/utils/Counters.sol";
+import "./openzeppelin/utils/Strings.sol";
 
 /**
  * @title The Dumples NFT Collection 
@@ -26,17 +26,17 @@ contract TheDumplesNFT is ERC721, ERC721Enumerable, ERC721URIStorage, Pausable, 
 
     /**
      * Constructor. 
-     * @param _name NFT token name 
-     * @param _symbol NFT token symbol 
+     * @param _tokenName NFT token name 
+     * @param _tokenSymbol NFT token symbol 
      * @param _maxSupply Number of items in the collection 
      * @param _baseUri Base URI used in token URI generation (incremented)
      */
     constructor(
-        string memory _name, 
-        string memory _symbol, 
+        string memory _tokenName, 
+        string memory _tokenSymbol, 
         uint256 _maxSupply, 
         string memory _baseUri
-        ) ERC721(_name, _symbol) {
+        ) ERC721(_tokenName, _tokenSymbol) {
             
         maxSupply = _maxSupply; 
         baseUri = _baseUri; 
@@ -46,7 +46,7 @@ contract TheDumplesNFT is ERC721, ERC721Enumerable, ERC721URIStorage, Pausable, 
      * Pauses the contract execution. 
      * @dev Functions like transfer and mint will revert when contract is paused. 
      */
-    function pause() public onlyOwner {
+    function pause() external onlyOwner {
         _pause();
     }
 
@@ -54,7 +54,7 @@ contract TheDumplesNFT is ERC721, ERC721Enumerable, ERC721URIStorage, Pausable, 
      * Unpauses the contract execution. 
      * @dev Will revert if contract is not paused. 
      */
-    function unpause() public onlyOwner {
+    function unpause() external onlyOwner {
         _unpause();
     }
     
@@ -62,7 +62,7 @@ contract TheDumplesNFT is ERC721, ERC721Enumerable, ERC721URIStorage, Pausable, 
      * Owner can change the maxSupply - the number of items in the collection. 
      * @param _maxSupply The new value to set for maxSupply. 
      */
-    function setMaxSupply(uint256 _maxSupply) public onlyOwner {
+    function setMaxSupply(uint256 _maxSupply) external onlyOwner {
         maxSupply = _maxSupply;
     }
     
@@ -70,7 +70,7 @@ contract TheDumplesNFT is ERC721, ERC721Enumerable, ERC721URIStorage, Pausable, 
      * Allows the owner to change the base token URI used to generate new token URIs. 
      * @param _baseUri The new value of baseUri. 
      */
-    function setBaseUri(string memory _baseUri) public onlyOwner {
+    function setBaseUri(string memory _baseUri) external onlyOwner {
         baseUri = _baseUri; 
     }
 
@@ -78,7 +78,7 @@ contract TheDumplesNFT is ERC721, ERC721Enumerable, ERC721URIStorage, Pausable, 
      * Allows the owner to mint. 
      * @param _to The address of the token recipient once minted. 
      */
-    function safeMint(address _to) public onlyOwner {
+    function safeMint(address _to) external onlyOwner {
         require(this.totalSupply() < maxSupply, "TDN: Max supply exceeded"); 
         uint256 tokenId = _tokenIdCounter;
         _tokenIdCounter+=1; 
@@ -90,9 +90,12 @@ contract TheDumplesNFT is ERC721, ERC721Enumerable, ERC721URIStorage, Pausable, 
      * Allows the owner to mint ALL tokens in the collection at once. 
      * @param _to The address of the token recipient once minted. 
      */
-    function safeMintAll(address _to) public onlyOwner {
+    function safeMintAll(address _to) external onlyOwner {
         for(uint n=0; n<maxSupply; n++) {
-            safeMint(_to); 
+            uint256 tokenId = _tokenIdCounter;
+            _tokenIdCounter+=1; 
+            _safeMint(_to, tokenId);
+            _setTokenURI(tokenId, _concatUri(tokenId));
         }
     }
 
@@ -100,7 +103,7 @@ contract TheDumplesNFT is ERC721, ERC721Enumerable, ERC721URIStorage, Pausable, 
      * Owner of a token may burn or destroy it. 
      * @param _tokenId The id of the token to burn. 
      */
-    function burn(uint256 _tokenId) public virtual {
+    function burn(uint256 _tokenId) external virtual {
         //solhint-disable-next-line max-line-length
         require(_isApprovedOrOwner(_msgSender(), _tokenId), "ERC721Burnable: caller is not owner nor approved");
         

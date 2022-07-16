@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.7.0;
+pragma solidity ^0.8.4;
 
-import "@openzeppelin/contracts/security/Pausable.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "./openzeppelin/security/Pausable.sol";
+import "./openzeppelin/access/Ownable.sol";
 import "./TheDumplesNFT.sol";
 
 /**
@@ -19,25 +19,25 @@ contract TheDumplesNFTFactory is Ownable, Pausable {
     
     /**
      * Spawns a new DumplesNFT contract and returns the address. 
-     * @param _name NFT token name 
-     * @param _symbol NFT token symbol 
-     * @param _maxSupply Number of items in the collection 
-     * @param _baseUri Base URI used in token URI generation (incremented)
+     * @param name NFT token name 
+     * @param symbol NFT token symbol 
+     * @param maxSupply Number of items in the collection 
+     * @param baseUri Base URI used in token URI generation (incremented)
      * @return The address of the new contract. 
      */
     function spawn(
-        string memory _name, 
-        string memory _symbol, 
-        uint256 _maxSupply, 
-        string memory _baseUri
-    ) public onlyOwner returns (address) {
-        return address(new TheDumplesNFT(_name, _symbol, _maxSupply, _baseUri)); 
+        string memory name, 
+        string memory symbol, 
+        uint256 maxSupply, 
+        string memory baseUri
+    ) external onlyOwner whenNotPaused returns (address) {
+        return address(new TheDumplesNFT(name, symbol, maxSupply, baseUri)); 
     } 
 
     /**
      * Pauses the contract execution. 
      */
-    function pause() public onlyOwner {
+    function pause() external onlyOwner {
         _pause();
     }
 
@@ -45,7 +45,7 @@ contract TheDumplesNFTFactory is Ownable, Pausable {
      * Unpauses the contract execution. 
      * @dev Will revert if contract is not paused. 
      */
-    function unpause() public onlyOwner {
+    function unpause() external onlyOwner {
         _unpause();
     }
 }
